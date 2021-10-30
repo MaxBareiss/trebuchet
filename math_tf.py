@@ -1,5 +1,19 @@
+# Walking Arm Trebuchet Optimization Program
+# Copyright (C) 2021  Max Bareiss
 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 if __name__ == "__main__":
     eqns = ['((IB + Im1)*Differential(t)(Differential(t)(θ1(t))) + L1*g*m1*cos(θ1(t)) + m1*(L1^2)*(cos(θ1(t))^2)*Differential(t)(Differential(t)(θ1(t))) + m1*(L1^2)*(sin(θ1(t))^2)*Differential(t)(Differential(t)(θ1(t))) + m2*(L2^2)*(cos(θ1(t))^2)*Differential(t)(Differential(t)(θ1(t))) + m2*(L2^2)*(sin(θ1(t))^2)*Differential(t)(Differential(t)(θ1(t))) + mB*(h0^2)*(sin(θ2(t))^2)*Differential(t)(Differential(t)(θ2(t))) + 0.5L1*g*mB*cos(θ1(t)) + 0.25mB*(L2^2)*(cos(θ1(t))^2)*Differential(t)(Differential(t)(θ1(t))) + mB*(h0^2)*(Differential(t)(θ2(t))^2)*cos(θ2(t))*sin(θ2(t)) + 0.25mB*(L1^2)*(cos(θ1(t))^2)*Differential(t)(Differential(t)(θ1(t))) + L2*L3*m2*(Differential(t)(θ3(t))^2)*cos(θ1(t))*sin(θ3(t)) + L1*h0*m1*(Differential(t)(θ2(t))^2)*sin(θ1(t))*cos(θ2(t)) + L1*h0*m1*cos(θ1(t))*cos(θ2(t))*Differential(t)(Differential(t)(θ2(t))) + L1*h0*m1*sin(θ1(t))*sin(θ2(t))*Differential(t)(Differential(t)(θ2(t))) + L2*h0*m2*(Differential(t)(θ2(t))^2)*cos(θ1(t))*sin(θ2(t)) + 0.5L1*L2*mB*(Differential(t)(θ1(t))^2)*cos(θ1(t))*sin(θ1(t)) + 0.5L1*h0*mB*(Differential(t)(θ1(t))^2)*cos(θ1(t))*sin(θ2(t)) + 0.5L1*h0*mB*cos(θ1(t))*cos(θ2(t))*Differential(t)(Differential(t)(θ2(t))) + 0.5L1*h0*mB*sin(θ1(t))*sin(θ2(t))*Differential(t)(Differential(t)(θ1(t))) + 0.5L2*h0*mB*(Differential(t)(θ2(t))^2)*cos(θ1(t))*sin(θ2(t)) - 0.5L2*g*mB*cos(θ1(t)) - L2*g*m2*cos(θ1(t)) - 0.25mB*(L1^2)*(Differential(t)(θ1(t))^2)*cos(θ1(t))*sin(θ1(t)) - 0.25mB*(L2^2)*(Differential(t)(θ1(t))^2)*cos(θ1(t))*sin(θ1(t)) - 0.5L1*L2*mB*(cos(θ1(t))^2)*Differential(t)(Differential(t)(θ1(t))) - L2*L3*m2*(Differential(t)(θ3(t))^2)*sin(θ1(t))*cos(θ3(t)) - L2*L3*m2*cos(θ1(t))*cos(θ3(t))*Differential(t)(Differential(t)(θ3(t))) - L1*h0*m1*(Differential(t)(θ2(t))^2)*cos(θ1(t))*sin(θ2(t)) - L2*L3*m2*sin(θ1(t))*sin(θ3(t))*Differential(t)(Differential(t)(θ3(t))) - 0.5L2*h0*mB*(Differential(t)(θ1(t))^2)*cos(θ1(t))*sin(θ2(t)) - 0.5L2*h0*mB*cos(θ1(t))*cos(θ2(t))*Differential(t)(Differential(t)(θ2(t))) - L2*h0*m2*(Differential(t)(θ2(t))^2)*sin(θ1(t))*cos(θ2(t)) - L2*h0*m2*cos(θ1(t))*cos(θ2(t))*Differential(t)(Differential(t)(θ2(t))) - L2*h0*m2*sin(θ1(t))*sin(θ2(t))*Differential(t)(Differential(t)(θ2(t))) - 0.5L1*h0*mB*(Differential(t)(θ2(t))^2)*cos(θ1(t))*sin(θ2(t)) - 0.5L2*h0*mB*sin(θ1(t))*sin(θ2(t))*Differential(t)(Differential(t)(θ1(t)))) == 0',
