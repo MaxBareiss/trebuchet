@@ -6,7 +6,6 @@ using Javis
 using Optim
 using LineSearches
 import Plots
-using Printf
 
 Unitful.preferunits(u"ft")
 
@@ -17,10 +16,10 @@ function rangeObjective(params)
     m1,h0,L1,L2,L3,β2,β3,β4 = params
     #m1 = ustrip(u"kg",10.0u"kg")
     #mL = ustrip(u"kg",1.0u"kg")
-    mL = h0*4 # kg per meter
-    mB = (L1+L2)*4 # kg per meter
+    mL = h0*2 # kg per meter
+    mB = (L1+L2)*2 # kg per meter
     #mB = ustrip(u"kg",5.0u"kg")
-    m2 = ustrip(u"kg",2u"kg")
+    m2 = ustrip(u"kg",58u"g") # Tennis ball
     #h0 = ustrip(u"m",20.5u"inch")
     #L1 = ustrip(u"m",14.75u"inch")
     #L2 = ustrip(u"m",20.0u"inch")
@@ -60,11 +59,11 @@ function rangeObjective(params)
         terminate!(integrator)
     end
 
-    u0 = [ustrip(u"rad",100u"°"),ustrip(u"rad/s",0u"°/s")]
+    u0 = [ustrip(u"rad",90u"°"),ustrip(u"rad/s",10u"°/s")]
 
     fallingCB = ContinuousCallback(falling_cond,terminator!)
 
-    fallingProb = ODEProblem(falling!,u0,[0,30.0])
+    fallingProb = ODEProblem(falling!,u0,[0,10.0])
 
     fallingsol = DifferentialEquations.solve(fallingProb; callback=fallingCB)
 
@@ -226,7 +225,7 @@ function rangeObjective(params)
 
     swingingBallProb = ODEProblem(swingingBall!,u0,[swingingsol.t[end],30.0])
 
-    swingingBallsol = DifferentialEquations.solve(swingingBallProb, AutoTsit5(Rosenbrock23()), reltol=1e-6, abstol=1e-6, dtmin=0.00001, force_dtmin=true; callback=swingingBallCB)
+    swingingBallsol = DifferentialEquations.solve(swingingBallProb, AutoTsit5(Rosenbrock23()), reltol=1e-6, abstol=1e-6, dtmin=0.0001, force_dtmin=true; callback=swingingBallCB)
 
     #print(fallingsol.retcode)
     #print("\n")
@@ -262,7 +261,6 @@ function rangeObjective(params)
 
     η = 1/2*m2*(vxm2^2+vym2^2) / (m1*g*(L1+L2-(h0-L1)))
 
-
     function flight!(du, u, p, t)
         x,y,vx,vy = u
 
@@ -295,7 +293,7 @@ function rangeObjective(params)
 
     tfinal = flightsol.t[end]
 
-    cost = abs(flightsol.u[end][1] + ustrip(u"m",200u"ft"))
+    cost = abs(flightsol.u[end][1] + 5.0)
 
     if (failure || ym2 < 0.0) # Launching below the ground is bad
         #print("\nFound instability\n")
@@ -310,127 +308,36 @@ function rangeObjective(params)
         cost += (L1/h0-0.8)*100000000000
     end
 
-    # Efficiencies higher than 80% are basically impossible and the result of solver weirdness
-    if (η > 0.8)
-        cost += (η-0.8)*100000000000
-    end
-
-    # Total arm length can't be greater than 8ft for transportation
-    if (L1+L2 > ustrip(u"m",8.0u"ft"))
-        cost += (L1+L2 - ustrip(u"m",8.0u"ft"))*100000000000
-    end
-
-    # Hitting the 42lb weights we have would be nice
-
-    johndeere_mass = ustrip(u"kg", 42.0u"lb")
-
-    weight_diff = min(m1 % johndeere_mass,(-m1) % johndeere_mass + johndeere_mass)
-
-    cost += weight_diff * 0.5 # Constant is ft/kg
-
-    cost -= η * 20 # Constant is ft/efficiency
-
+    
     println(η)
 
-    [cost,rL,η,flightsol.u[end][1],fallingsol,swingingsol,swingingBallsol,flightsol]
+    [cost,rL,η,fallingsol,swingingsol,swingingBallsol,flightsol]
 end
 
-#        m1                       h0                     L1                     L2  L3   β2   β3   β4
-#x0 =    [ustrip(u"kg", 84.0u"lb"),ustrip(u"m", 2.0u"ft"),ustrip(u"m", 1.0u"ft"),0.8,0.35,0.9, 0.0,-0.3]
-#lower = [ustrip(u"kg",  5.0u"lb"),ustrip(u"m", 1.0u"ft"),ustrip(u"m", 0.5u"ft"),0.2,0.2 ,0.0,-0.5,-0.5]
-#upper = [ustrip(u"kg",290.0u"lb"),ustrip(u"m", 8.0u"ft"),ustrip(u"m", 8.0u"ft"),3.0,3.0 ,1.5, 0.5, 0.5]
-
-x0 = zeros(8)
-lower = zeros(8)
-upper = zeros(8)
-
-# m1
-# Counterweight mass
-x0[1]    = ustrip(u"kg", 84.0u"lb")
-lower[1] = ustrip(u"kg", 5.0u"lb")
-upper[1] = ustrip(u"kg", 200.0u"lb")
-
-# h0
-# Leg length
-x0[2]    = ustrip(u"m", 2.0u"ft")
-lower[2] = ustrip(u"m", 1.0u"ft")
-upper[2] = ustrip(u"m", 8.0u"ft")
-
-# L1
-# Distance from leg pivot to counterweight CG
-x0[3]    = ustrip(u"m", 1.0u"ft")
-lower[3] = ustrip(u"m", 0.5u"ft")
-upper[3] = ustrip(u"m", 8.0u"ft")
-
-# L2
-# Distance from leg pivot to end of arm
-x0[4]    = ustrip(u"m", 2.0u"ft")
-lower[4] = ustrip(u"m", 0.5u"ft")
-upper[4] = ustrip(u"m", 8.0u"ft")
-
-# L3
-# Length of sling rope
-x0[5]    = ustrip(u"m", 1.0u"ft")
-lower[5] = ustrip(u"m", 0.5u"ft")
-upper[5] = ustrip(u"m", 8.0u"ft")
-
-# β2
-# Initial angle between legs and arm
-x0[6]    = ustrip(u"rad", 50.0u"°")
-lower[6] = ustrip(u"rad",  0.0u"°")
-upper[6] = ustrip(u"rad", 90.0u"°")
-
-# β3
-# Pumpkin shelf angle
-x0[7]    = ustrip(u"rad",  0.0u"°")
-lower[7] = ustrip(u"rad",-30.0u"°")
-upper[7] = ustrip(u"rad", 30.0u"°")
-
-# β4
-# Sling pin angle
-x0[8]    = ustrip(u"rad",-20.0u"°")
-lower[8] = ustrip(u"rad",-30.0u"°")
-upper[8] = ustrip(u"rad", 30.0u"°")
-
-println(x0)
+#         m1   h0   L1   L2   L3   β2   β3   β4
+x0 =    [ 1.21,0.35,0.20,0.20,0.30,0.9, 0.0,-0.3]
+lower = [ 1.19,0.25,0.05,0.05,0.05,0.0,-0.5,-0.5]
+upper = [ 1.22,0.55,0.50,0.55,0.55,1.5, 0.5, 0.5]
 
 #inner_optimizer = GradientDescent()
 inner_optimizer = NelderMead()
-#res = optimize((params) -> rangeObjective(params)[1],lower,upper,x0,
-#               Fminbox(inner_optimizer), Optim.Options(iterations=60))
-#print(res)
+res = optimize((params) -> rangeObjective(params)[1],lower,upper,x0,
+               Fminbox(inner_optimizer), Optim.Options(iterations=60))
 
-#params = Optim.minimizer(res)
+params = Optim.minimizer(res)
 
-#params = [97.73642126501247, 1.5885194971158123, 0.6719153997234893, 1.3544943686783613, 0.3746098982354781, 1.5584168976571011, -0.03368256616828467, -0.036857115801595564]
-params = [76.6150197154561, 1.7171612213245058, 0.8117290781492692, 1.409920577867896, 0.4200042413116609, 1.564216230576242, -0.022370122733021736, -0.07295245656886565]
-
-
+print(res)
 print(params)
 print("\n")
 
-cost,rL,η,rangeThrown,fallingsol,swingingsol,swingingBallsol,flightsol = rangeObjective(params)
+rangeThrown,rL,η,fallingsol,swingingsol,swingingBallsol,flightsol = rangeObjective(params)
 
-println("RANGE (ft)")
-println(ustrip(u"ft",rangeThrown*1.0u"m"))
-println("EFFICIENCY")
-println(η)
-
-# m1 h0 L1 L2 L3 β2 β3 β4
-@printf("Counterweight Mass: %.1f lbs\n", ustrip(u"lb",params[1]*1u"kg"))
-@printf("Leg Length: %.1f in\n", ustrip(u"inch",params[2]*1u"m"))
-@printf("Pivot-CW Distance: %.1f in\n", ustrip(u"inch",params[3]*1u"m"))
-@printf("Pivot-End Distance: %.1f in\n", ustrip(u"inch",params[4]*1u"m"))
-@printf("Sling Length to Pumpkin CG: %.1f in\n", ustrip(u"inch",params[5]*1u"m"))
-@printf("Initial Angle from Legs to Arm: %.0f°\n", ustrip(u"°",params[6]*1u"rad"))
-@printf("Pumpkin Shelf Angle: %.0f°\n", ustrip(u"°",params[7]*1u"rad"))
-@printf("Sling Pin Angle: %.0f°\n", ustrip(u"°",params[8]*1u"rad"))
+println("RANGE")
+println(rangeThrown)
 
 function renderLaunch(params,rL,fallingsol,swingingsol,swingingBallsol)
     m1,h0,L1,L2,L3,β2,β3,β4 = params
     β1 = ustrip(u"rad",10.0u"°")
-
-    FPS = 180
 
     step1_start = fallingsol.t[1]
     step1_end = fallingsol.t[end]
@@ -439,9 +346,7 @@ function renderLaunch(params,rL,fallingsol,swingingsol,swingingBallsol)
     step3_start = step2_end
     step3_end = swingingBallsol.t[end-2]
 
-    num_frames = trunc(Integer,step3_end*FPS)
-
-    t = Vector(range(0,stop=step3_end,length=num_frames))
+    t = Vector(range(0,stop=step3_end,length=1000))
 
     step1 = [[x[1],x[2],x[1]+β2,x[2],x[1]+β1,x[2]] for x in fallingsol(t[(t .>= step1_start) .& (t .< step1_end)])]
     step2 = [[x[1],x[2],x[3]   ,x[4],x[1]+β1,x[2]] for x in swingingsol(t[(t .>= step2_start) .& (t .< step2_end)])]
@@ -502,7 +407,7 @@ function renderLaunch(params,rL,fallingsol,swingingsol,swingingBallsol)
 
     vid = Video(750,750)
 
-    Background(1:num_frames, ground)
+    Background(1:1000, ground)
 
     #Luxor.scale(0.01,0.01) # meters per pixel
     #Luxor.scale(100,100) # pixels per meter
@@ -511,32 +416,19 @@ function renderLaunch(params,rL,fallingsol,swingingsol,swingingBallsol)
     leg = Object((video,object,frame) -> cap_line(leg_outer[frame],leg_inner[frame],"gray"))
     rope = Object((video,object,frame) -> cap_line(beam_tip[frame],m2_outer[frame],"orange",0.005))
 
-
-    function tc_func(frame_no)
-        scale(1,-1) # Handedness back to normal graphics
-        sethue("black") # pen color
-        setline(3)
-        fontsize(0.5)
-        fontface("sans-serif")
-        text(@sprintf("%05.0f ms",frame_no/FPS*1000.0),Point(-2,-6),valign=:middle,halign=:left)
-        scale(1,-1) # Handedness back to physics
-    end
-
-    tc = Object((video,object,frame) -> tc_func(frame))
-
     #act!(beam,Action(1:1000,scale(100)))
     #act!(leg,Action(1:1000,scale(100)))
     #act!(rope,Action(1:1000,scale(100)))
 
     render(
         vid,
-        pathname="treb_slow.gif",
-        liveview=false
+        pathname="treb.gif",
+        liveview=true
     )
 
 end
 
 renderLaunch(params,rL,fallingsol,swingingsol,swingingBallsol)
-display(Plots.plot(flightsol,vars=[(1,2)],aspect_ratio=:equal))
+display(Plots.plot(flightsol,vars=[(1,2)]))
 
 end

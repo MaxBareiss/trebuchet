@@ -1,0 +1,35 @@
+Counterweight Mass: 210.5 lbs
+Leg Length: 57.8 in
+Pivot-CW Distance: 34.1 in
+Pivot-End Distance: 51.2 in
+Sling Length to Pumpkin CG: 17.6 in
+Initial Angle from Legs to Arm: 83°
+Pumpkin Shelf Angle: -1°
+Sling Pin Angle: -6°
+
+Counterweight Mass: 211.1 lbs
+Leg Length: 61.0 in
+Pivot-CW Distance: 36.8 in
+Pivot-End Distance: 55.5 in
+Sling Length to Pumpkin CG: 16.1 in
+Initial Angle from Legs to Arm: 76°
+Pumpkin Shelf Angle: -1°
+Sling Pin Angle: -5°
+
+Counterweight Mass: 215.5 lbs
+Leg Length: 62.5 in
+Pivot-CW Distance: 26.5 in
+Pivot-End Distance: 53.3 in
+Sling Length to Pumpkin CG: 14.7 in
+Initial Angle from Legs to Arm: 89°
+Pumpkin Shelf Angle: -2°
+Sling Pin Angle: -2°
+
+Counterweight Mass: 168.9 lbs
+Leg Length: 67.6 in
+Pivot-CW Distance: 32.0 in
+Pivot-End Distance: 55.5 in
+Sling Length to Pumpkin CG: 16.5 in
+Initial Angle from Legs to Arm: 90°
+Pumpkin Shelf Angle: -1°
+Sling Pin Angle: -4°
